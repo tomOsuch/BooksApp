@@ -10,12 +10,16 @@
     },
     book: {
       image: '.book__image'
+    },
+    filters: {
+      section: '.filters',
     }
   };
 
   const classNames = {
     book: {
       favorite: 'favorite',
+      hidden: 'hidden',
     },
   };
 
@@ -35,6 +39,7 @@
     },
 
     favoriteBooks: [],
+    filters: [],
 
     initActions: function () {
       const bookContainer = document.querySelector(select.containerOf.book);
@@ -58,6 +63,54 @@
 
         currentBookLink.classList.toggle(classNames.book.favorite);
       });
+
+      const filtersContainer = document.querySelector(select.filters.section);
+
+      filtersContainer.addEventListener('click', (event) => {
+        const filter = event.target.value;
+        if (event.target.tagName === 'INPUT' && event.target.type === 'checkbox' && event.target.getAttribute('name') === 'filter') {
+          if (event.target.checked) {
+            this.filters.push(filter);
+          } else {
+            const index = this.filters.findIndex((item) => item === filter);
+            this.filters.splice(index, 1);
+          }
+        }
+
+        this.filterBooks();
+      });
+    },
+
+    filterBooks: function () {
+      const allBooks = document.querySelectorAll(select.book.image);
+
+      for (let book of allBooks) {
+        const dataId = parseInt(book.getAttribute('data-id'));
+        const bookDetails = dataSource.books.find((bookData) => bookData.id === dataId);
+        const bookCategories = this.getBookCategories(bookDetails);
+
+        if (this.shouldHideBook(bookCategories)) {
+          book.classList.add(classNames.book.hidden);
+        } else {
+          book.classList.remove(classNames.book.hidden);
+        }
+      }
+    },
+
+    getBookCategories: function (book) {
+      const categories = [];
+
+      if (book.details.adults) {
+        categories.push('adults');
+      }
+      if (book.details.nonFiction) {
+        categories.push('nonFiction');
+      }
+      return categories;
+    },
+
+    shouldHideBook: function (bookCategories) {
+      return this.filters.some((filterName) => !bookCategories.includes(filterName));
     },
 
     init: function () {
