@@ -27,14 +27,19 @@
     book: Handlebars.compile(document.querySelector(select.templateOf.book).innerHTML),
   };
 
-  const app = {
-    renderBooks: function () {
+  class BookList {
+    constructor() {
+      this.favoriteBooks = [];
+      this.filters = [];
+    }
+
+    renderBooks() {
       dataSource.books.forEach((book) => {
         this.renderBook(book);
       });
 
-    },
-    determineRatingBgc: function (rating) {
+    }
+    determineRatingBgc(rating) {
       if (rating < 6) {
         return 'linear-gradient(to bottom,  #fefcea 0%, #f1da36 100%)';
       }
@@ -45,8 +50,8 @@
         return 'linear-gradient(to bottom, #299a0b 0%, #299a0b 100%)';
       }
       return 'linear-gradient(to bottom, #ff0084 0%,#ff0084 100%)';
-    },
-    renderBook: function (bookData) {
+    }
+    renderBook(bookData) {
       const bookDataWithRating = Object.assign({}, bookData, {
         ratingWidth: bookData.rating * 10,
         ratingBgc: this.determineRatingBgc(bookData.rating),
@@ -56,12 +61,9 @@
       const domElement = utils.createDOMFromHTML(generatedHTML);
       const bookContainer = document.querySelector(select.containerOf.book);
       bookContainer.appendChild(domElement);
-    },
+    }
 
-    favoriteBooks: [],
-    filters: [],
-
-    initActions: function () {
+    initActions() {
       const bookContainer = document.querySelector(select.containerOf.book);
 
       bookContainer.addEventListener('dblclick', (event) => {
@@ -99,9 +101,9 @@
 
         this.filterBooks();
       });
-    },
+    }
 
-    filterBooks: function () {
+    filterBooks() {
       const allBooks = document.querySelectorAll(select.book.image);
 
       for (let book of allBooks) {
@@ -115,9 +117,9 @@
           book.classList.remove(classNames.book.hidden);
         }
       }
-    },
+    }
 
-    getBookCategories: function (book) {
+    getBookCategories(book) {
       const categories = [];
 
       if (book.details.adults) {
@@ -127,17 +129,20 @@
         categories.push('nonFiction');
       }
       return categories;
-    },
+    }
 
-    shouldHideBook: function (bookCategories) {
+    shouldHideBook(bookCategories) {
       return this.filters.some((filterName) => !bookCategories.includes(filterName));
-    },
+    }
 
-    init: function () {
+    init() {
       this.renderBooks();
       this.initActions();
-    },
-  };
+    }
+
+  }
+
+  const app = new BookList();
 
   app.init();
 }
