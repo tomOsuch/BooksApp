@@ -29,10 +29,30 @@
 
   const app = {
     renderBooks: function () {
-      dataSource.books.forEach(this.renderBook);
+      dataSource.books.forEach((book) => {
+        this.renderBook(book);
+      });
+
+    },
+    determineRatingBgc: function (rating) {
+      if (rating < 6) {
+        return 'linear-gradient(to bottom,  #fefcea 0%, #f1da36 100%)';
+      }
+      if (rating >= 6 && rating <= 8) {
+        return 'linear-gradient(to bottom, #b4df5b 0%,#b4df5b 100%)';
+      }
+      if (rating > 8 && rating <= 9) {
+        return 'linear-gradient(to bottom, #299a0b 0%, #299a0b 100%)';
+      }
+      return 'linear-gradient(to bottom, #ff0084 0%,#ff0084 100%)';
     },
     renderBook: function (bookData) {
-      const generatedHTML = templates.book(bookData);
+      const bookDataWithRating = Object.assign({}, bookData, {
+        ratingWidth: bookData.rating * 10,
+        ratingBgc: this.determineRatingBgc(bookData.rating),
+      });
+
+      const generatedHTML = templates.book(bookDataWithRating);
       const domElement = utils.createDOMFromHTML(generatedHTML);
       const bookContainer = document.querySelector(select.containerOf.book);
       bookContainer.appendChild(domElement);
