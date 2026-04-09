@@ -1,62 +1,70 @@
-'use strict';
+{
+  'use strict';
 
-const select = {
-  templateOf: {
-    book: '#template-book',
-  },
-  wrapper: {
-    bookList: '.books-list',
-    cover: '.books-list .book__image',
-  },
-  class: {
-    favoriteBook: 'favorite',
-  },
-};
+  const select = {
+    templateOf: {
+      book: '#template-book',
+    },
+    containerOf: {
+      book: '.books-list'
+    },
+    book: {
+      image: '.book__image'
+    }
+  };
 
-const templates = {
-  booksList: Handlebars.compile(document.querySelector(select.templateOf.book).innerHTML),
-};
+  const classNames = {
+    book: {
+      favorite: 'favorite',
+    },
+  };
 
-const bookContainer = document.querySelector(select.wrapper.bookList);
-const allBooks = [];
-const favoriteBooks = [];
+  const templates = {
+    book: Handlebars.compile(document.querySelector(select.templateOf.book).innerHTML),
+  };
 
-function render() {
-  for (let book of dataSource.books) {
-    const generatedHTML = templates.booksList(book);
-    /* create element using utils.createElementFromHTML */
-    const element = utils.createDOMFromHTML(generatedHTML);
-    /* add element to menu */
-    bookContainer.appendChild(element);
-    allBooks.push(element);
-  }
-}
+  const app = {
+    renderBooks: function () {
+      dataSource.books.forEach(this.renderBook);
+    },
+    renderBook: function (bookData) {
+      const generatedHTML = templates.book(bookData);
+      const domElement = utils.createDOMFromHTML(generatedHTML);
+      const bookContainer = document.querySelector(select.containerOf.book);
+      bookContainer.appendChild(domElement);
+    },
 
-function initActions() {
-  const bookCovers = document.querySelectorAll(select.wrapper.cover);
+    favoriteBooks: [],
 
-  for(let bookCover of bookCovers) {
-    bookCover.addEventListener('dblclick', function(event) {
-      const clickedElement = this;
+    initActions: function () {
+      const bookContainer = document.querySelector(select.containerOf.book);
 
-      event.preventDefault();
+      bookContainer.addEventListener('dblclick', (event) => {
+        event.preventDefault();
 
-      const id = clickedElement.getAttribute('data-id');
-      if(!favoriteBooks.includes(id)) {
-        clickedElement.classList.add(select.class.favoriteBook);
-        favoriteBooks.push(id);
-      } else {
-        clickedElement.classList.remove(select.class.favoriteBook);
-      
-        const i = favoriteBooks.indexOf(id);
-        if (i !== -1) {
-          favoriteBooks.splice(i, 1);
+        if (!event.target.offsetParent.classList.contains('book__image')) {
+          return;
         }
-      }
-      console.log('Favorite books:', favoriteBooks);
-    }); 
-  }
-}
 
-render();
-initActions();
+        const currentBookLink = event.target.offsetParent;
+        const dataId = currentBookLink.getAttribute('data-id');
+
+        if (this.favoriteBooks.includes(dataId)) {
+          const index = this.favoriteBooks.findIndex((bookId) => bookId === dataId);
+          this.favoriteBooks.splice(index, 1);
+        } else {
+          this.favoriteBooks.push(dataId);
+        }
+
+        currentBookLink.classList.toggle(classNames.book.favorite);
+      });
+    },
+
+    init: function () {
+      this.renderBooks();
+      this.initActions();
+    },
+  };
+
+  app.init();
+}
